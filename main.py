@@ -4,6 +4,7 @@ import requests
 import os
 import argparse
 from google.cloud import storage
+from graph import *
 
 
 ABS_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -43,15 +44,14 @@ def download_file_from_bucket(bl_name, file_path, buc_name):
 def get_ancestors_list(resurs_id, data):
     res_one = None
     folder = resurs_id.split("/")[-1]
+    ancestors = []
     for resurs in data:
         if resurs_id in resurs["name"]:
             res_one = resurs
-    ancestor = None
-    for anc in res_one["ancestors"]:
-        if folder == anc.split("/")[-1]:
-            ancestor = anc
-    result = ancestor.split('/')[::-1]
-    return result
+    for ancestor in res_one["ancestors"]:
+        for anc in ancestor.split("/")[::-1]:
+            ancestors.append(anc)
+    return ancestors
 
 
 def get_resources_list(un_id, data):
@@ -90,6 +90,17 @@ def get_members(un_id, data):
     return result
 
 
+def create_graph(data):
+    res_list = []
+    for resurs in data:
+        for members in resurs["iam_policy"]["bindings"]:
+            for member in members["members"]:
+                res_list.append(member.split(":")[-1])
+                res_list.append(resurs["name"])
+    Node.create_tuples(res_list)
+    return res_list
+
+
 
 
 def main():
@@ -98,15 +109,17 @@ def main():
     with open(CURRENT_FILE_NAME, 'r') as f:
         string_data = f.read().splitlines()
     list_data = [ast.literal_eval(data) for data in string_data]
-    if args.ancestors:
-        list_ancestors = get_ancestors_list(args.ancestors, list_data)
-        print(list_ancestors)
-    elif args.members:
-        list_resources = get_resources_list(args.members, list_data)
-        print(list_resources)
-    elif args.resources:
-        list_members = get_members(args.resources, list_data)
-        print(list_members)
+    print("First Task")
+    first = create_graph(list_data)
+    print("Second Task")
+    list_ancestors = get_ancestors_list("//cloudresourcemanager.googleapis.com/folders/188906894377", list_data)
+    print(list_ancestors)
+    print("Third Task")
+    list_resources = get_resources_list("exercise-fetcher@striking-arbor-264209.iam.gserviceaccount.com", list_data)
+    print(list_resources)
+    print("Fourth Task")
+    list_members = get_members("//cloudresourcemanager.googleapis.com/projects/185023072868", list_data)
+    print(list_members)
 
 
 if __name__ == '__main__':
