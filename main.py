@@ -96,7 +96,6 @@ def main():
     with open(CURRENT_FILE_NAME, 'r') as f:
         string_data = f.read().splitlines()
     list_data = [ast.literal_eval(data) for data in string_data]
-    breakpoint()
     if args.ancestors:
         list_ancestors = get_ancestors_list(args.ancestors, list_data)
         print(list_ancestors)
@@ -109,7 +108,7 @@ def main():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--ancestors", dest="ancestors", help="write resource id", type=str)
-    parser.add_argument("-m", "--members", dest="ancestors", help="write resource id", type=str)
-    parser.add_argument("-r", "--resources", dest="ancestors", help="write member id", type=str)
+    parser.add_argument("-m", "--members", dest="members", help="write resource id", type=str)
+    parser.add_argument("-r", "--resources", dest="resources", help="write member id", type=str)
     args = parser.parse_args()
     main()
