@@ -4,6 +4,10 @@ import requests
 import os
 import argparse
 from google.cloud import storage
+import itertools
+import networkx as nx
+import numpy.random as rnd
+import matplotlib.pyplot as plt
 
 
 ABS_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -90,6 +94,28 @@ def get_members(un_id, data):
     return result
 
 
+def create_graph():
+    graph = nx.Graph()
+    graph.add_node('A')
+    graph.add_node('B')
+    graph.add_node('C')
+    graph.nodes()
+    add_edge('A', 'B', graph=graph)
+    add_edge('B', 'C', graph=graph)
+    add_edge('B', 'D', graph=graph)
+    add_edge('D', 'E', graph=graph)
+
+    nx.draw_circular(graph,
+                     node_color='red',
+                     node_size=1000,
+                     with_labels=True)
+
+
+def add_edge(f_item, s_item, graph=None):
+  graph.add_edge(f_item, s_item)
+  graph.add_edge(s_item, f_item)
+
+
 def main():
     download_file_from_bucket(blob_name, CURRENT_FILE_NAME, bucket_name)
     string_data = []
@@ -101,8 +127,11 @@ def main():
         print(list_ancestors)
     elif args.members:
         list_resources = get_resources_list(args.members, list_data)
+        print(list_resources)
     elif args.resources:
         list_members = get_members(args.resources, list_data)
+        print(list_members)
+    create_graph()
 
 
 if __name__ == '__main__':
